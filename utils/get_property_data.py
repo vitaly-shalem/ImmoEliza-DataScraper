@@ -2,10 +2,15 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import json
+from pathlib import Path
+import time
 
 
 def get_property_data_from_js(id, data):
     """ Add """
+    immo_data = {
+        id: {}
+    }
     # get price
     immo_data[id]["price"] = data["transaction"]["sale"]["price"]
     # get property data
@@ -17,7 +22,7 @@ def get_property_data_from_js(id, data):
                 "parkingCountIndoor", "parkingCountOutdoor", "parkingCountClosedBox"]
     for prop in property:
         if prop == "location":
-            loc = ["country", "region", "province", "district", "locality", 
+            loc = ["country", "region", "province", "district", "locality",
                    "postalCode", "street", "number", "box", "floor"]
             for l in loc:
                 immo_data[id][l] = data["property"][prop][l]
@@ -61,15 +66,17 @@ def get_property_data_from_js(id, data):
     elif data["flags"]["isAnInteractiveSale"]:
         sale_type = "AnInteractiveSale"
     immo_data[id]["saleType"] = sale_type
-    
+    return immo_data
 
 
 def scrape_property_data(id, session):
     """ Add """
     url = "https://www.immoweb.be/en/classified/" + id
-    immo_data[id] = dict()
+    immo_data = {
+        id: {}
+    }
     immo_data[id]["URL"] = url
-    
+
     req = session.get(url)
     status = req.status_code
 
@@ -79,40 +86,52 @@ def scrape_property_data(id, session):
         immo_data[id]["Status"] = status
         content = req.content
         s = BeautifulSoup(content, "html.parser")
-            
+
         script_tags = s.find_all('script', {'type': 'text/javascript'})
         for st in script_tags:
             if st.text.find("window.classified") != -1:
                 js_var = re.search(r"window\.classified = (\{.*\});", st.text)
                 js_var_value = js_var.group(1)
                 js_data = json.loads(js_var_value)
-                #immo_data[id]["Data"] = js_data
-                get_property_data_from_js(id, js_data)
+                # immo_data[id]["Data"] = js_data
+                immo_data.update(get_property_data_from_js(id, js_data))
                 break
             else:
                 continue
+    return immo_data
 
-immo_data = dict()
 
-def scrape_properties(file):
+def scrape_properties():
     """ Add """
-    file = open(file + ".txt", "r")
-    count = 0
-    session = requests.Session()
-    for line in file.readlines():
-        id = line.strip()
-        # Add concurrency
-        # Send scrape_property_data to multiple workers
-        if id not in immo_data.keys():
-            scrape_property_data(id, session)
-        count += 1
-        if count % 10 == 0:
-            print(count)
+    file_name = "properties_ids.txt"
+    file_path = str(Path.cwd() / "data" / file_name)
+    immo_data = {}
+    with open(file_path, "r") as file:
+        count = 0
+        with requests.Session() as session:
+            for line in file.readlines():
+                id = line.strip()
+                # Add concurrency
+                # Send scrape_property_data to multiple workers
+                # if id not in immo_data.keys():
+                immo_data.update(scrape_property_data(id, session))
+                count += 1
+                if count % 10 == 0:
+                    print(count)
+    return immo_data
 
 
-def save_to_json(file):
+def save_to_json(immo_data):
     """ Add """
-    output = file + "_data.json"
-    with open(output, "w", encoding="utf-8") as json_file:
+    file_name = "propreties_data.json"
+    file_path = str(Path.cwd() / "data" / file_name)
+    with open(file_path, "w", encoding="utf-8") as json_file:
         json_file.write(json.dumps(immo_data, indent=4))
-    return output
+    # return immo_data
+
+
+if __name__ == "__main__":
+    start = time.time()
+    save_to_json(scrape_properties())
+    end = time.time()
+    print("Time Taken: {:.6f}s".format(end-start))
