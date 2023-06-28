@@ -4,6 +4,7 @@ import re
 import json
 from pathlib import Path
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 
 def get_property_data_from_js(id, data):
@@ -108,16 +109,20 @@ def scrape_properties():
     immo_data = {}
     with open(file_path, "r") as file:
         count = 0
+
         with requests.Session() as session:
-            for line in file.readlines():
-                id = line.strip()
-                # Add concurrency
-                # Send scrape_property_data to multiple workers
-                # if id not in immo_data.keys():
-                immo_data.update(scrape_property_data(id, session))
-                count += 1
-                if count % 10 == 0:
-                    print(count)
+            with ThreadPoolExecutor(max_workers=10) as executor:
+                executor.map(lambda id: immo_data.update(scrape_property_data(id, session)), [id.strip() for id in file])
+
+        # for line in file.readlines():
+        #     id = line.strip()
+        #     # Add concurrency
+        #     # Send scrape_property_data to multiple workers
+        #     # if id not in immo_data.keys():
+        #     immo_data.update(scrape_property_data(id, session))
+        #     count += 1
+        #     if count % 10 == 0:
+        #         print(count)
     return immo_data
 
 
