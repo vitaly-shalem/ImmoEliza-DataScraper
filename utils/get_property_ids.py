@@ -22,3 +22,16 @@ def get_ids(pages, max_workers):
             print(f"Number of ids: {len(flattened_result)}")
             print("Time Taken: {:.6f}s".format(end-start))
             return flattened_result
+
+
+def save_to_txt(ids):
+    with open('id.txt', 'w') as f:
+        for id in ids:
+            f.write('%s\n' % id)
+
+
+if __name__ == "__main__":
+    start = time.time()
+    save_to_txt(get_ids(10, 10))
+    end = time.time()
+    print("Total Time Taken: {:.6f}s".format(end-start))
