@@ -1,21 +1,24 @@
 import requests
+from concurrent.futures import ThreadPoolExecutor
 import time
+import itertools
 
-url_lists = "https://www.immoweb.be/en/search-results/house-and-apartment/for-sale?countries=BE&page=1&orderBy=newest"
 
-
-def get_ids(pages, session):
+def get_ids_from_page(page, session):
     ids = []
-    for page in range(pages):
-        url_lists = f"https://www.immoweb.be/en/search-results/house-and-apartment/for-sale?countries=BE&page={page}&orderBy=newest"
-        r = session.get(url_lists)
-        ids += [listing['id'] for listing in r.json()["results"]]
+    url_lists = f"https://www.immoweb.be/en/search-results/house-and-apartment/for-sale?countries=BE&page={page}&orderBy=newest"
+    r = session.get(url_lists)
+    ids = [listing['id'] for listing in r.json()["results"]]
     return ids
 
 
-with requests.Session() as session:
-
-    start = time.time()
-    ids = get_ids(20, session)
-    end = time.time()
-    print(f"retrieved {len(ids)} ids in {end - start} seconds")
+def get_ids(pages, max_workers):
+    with requests.Session() as session:
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            start = time.time()
+            result = list(executor.map(lambda page: get_ids_from_page(page, session), range(1, pages+1)))
+            flattened_result = list(itertools.chain.from_iterable(result))
+            end = time.time()
+            print(f"Number of ids: {len(flattened_result)}")
+            print("Time Taken: {:.6f}s".format(end-start))
+            return flattened_result
