@@ -7,8 +7,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 
-def get_property_data_from_js(data, dict):
-    """ Add """
+def get_js_data(data, dict):
     # get price
     dict["price"] = data["transaction"]["sale"]["price"]
     # get property data
@@ -69,21 +68,20 @@ def get_property_data_from_js(data, dict):
     return dict
 
 
-def scrape_property_data(id, session):
-    """ Add """
+def get_page_data(id, session):
     url = "https://www.immoweb.be/en/classified/" + id
-    immo_data = {
+    property_data = {
         id: {}
     }
-    immo_data[id]["URL"] = url
+    property_data[id]["URL"] = url
 
     req = session.get(url)
     status = req.status_code
 
     if status != 200:
-        immo_data[id]["Status"] = status
+        property_data[id]["Status"] = status
     else:
-        immo_data[id]["Status"] = status
+        property_data[id]["Status"] = status
         content = req.content
         s = BeautifulSoup(content, "html.parser")
 
@@ -93,35 +91,33 @@ def scrape_property_data(id, session):
                 js_var = re.search(r"window\.classified = (\{.*\});", st.text)
                 js_var_value = js_var.group(1)
                 js_data = json.loads(js_var_value)
-                immo_data[id] = get_property_data_from_js(js_data, immo_data[id])
+                property_data[id] = get_js_data(js_data, property_data[id])
                 break
             else:
                 continue
-    return immo_data
+    return property_data
 
 
-def scrape_properties():
-    """ Add """
+def scrape_from_txt():
     file_name = "properties_ids.txt"
     file_path = str(Path.cwd() / "data" / file_name)
-    immo_data = {}
+    property_data = {}
     with open(file_path, "r") as file:
         with requests.Session() as session:
             with ThreadPoolExecutor(max_workers=10) as executor:
-                executor.map(lambda id: immo_data.update(scrape_property_data(id, session)), [id.strip() for id in file])
-    return immo_data
+                executor.map(lambda id: property_data.update(get_page_data(id, session)), [id.strip() for id in file])
+    return property_data
 
 
 def save_to_json(data):
-    """ Add """
     file_name = "propreties_data.json"
     file_path = str(Path.cwd() / "data" / file_name)
     with open(file_path, "w", encoding="utf-8") as json_file:
         json_file.write(json.dumps(data, indent=4))
 
 
-if __name__ == "__main__":
+def property_scraper():
     start = time.time()
-    save_to_json(scrape_properties())
+    save_to_json(scrape_from_txt())
     end = time.time()
-    print("Time Taken: {:.6f}s".format(end-start))
+    print("Time taken to scrape listings: {:.6f}s".format(end-start))
