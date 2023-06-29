@@ -110,15 +110,14 @@ def scrape_from_txt():
 
 
 def save_to_json(data):
-    file_name = "propreties_data.json"
+    file_name = "properties_data.json"
     file_path = str(Path.cwd() / "data" / file_name)
     with open(file_path, "w", encoding="utf-8") as json_file:
-        json_file.write(json.dumps(data, indent=4))
+        json.dump(data, json_file, ensure_ascii=False, indent=4)
 
 
 def property_scraper():
     start = time.time()
-    print("Property scraping started at %s" % start)
     save_to_json(scrape_from_txt())
     end = time.time()
     print("Time taken to scrape listings: {:.6f}s".format(end-start))

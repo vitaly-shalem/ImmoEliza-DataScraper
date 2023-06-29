@@ -36,7 +36,6 @@ def save_to_txt(ids):
 
 def id_scraper(pages):
     start = time.time()
-    print("Id scraping started at %s" % start)
     ids = get_ids(pages)
     save_to_txt(ids)
     end = time.time()
