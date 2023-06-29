@@ -7,13 +7,10 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 
-def get_property_data_from_js(id, data):
+def get_property_data_from_js(data, dict):
     """ Add """
-    immo_data = {
-        id: {}
-    }
     # get price
-    immo_data[id]["price"] = data["transaction"]["sale"]["price"]
+    dict["price"] = data["transaction"]["sale"]["price"]
     # get property data
     property = ["type", "subtype", "location",
                 "bedroomCount", "netHabitableSurface", "building", "hasLift", "kitchen",
@@ -26,37 +23,38 @@ def get_property_data_from_js(id, data):
             loc = ["country", "region", "province", "district", "locality",
                    "postalCode", "street", "number", "box", "floor"]
             for l in loc:
-                immo_data[id][l] = data["property"][prop][l]
+                dict[l] = data["property"][prop][l]
         elif prop == "building":
             sub = ["constructionYear", "facadeCount", "floorCount"]
             for s in sub:
                 if data["property"][prop] != None:
-                    immo_data[id][s] = data["property"][prop][s]
+                    dict[s] = data["property"][prop][s]
                 else:
-                    immo_data[id][s] = None
+                    dict[s] = None
         elif prop == "kitchen":
             if data["property"][prop] != None:
-                immo_data[id][prop] = data["property"][prop]["type"]
+                dict[prop] = data["property"][prop]["type"]
             else:
-                immo_data[id][prop] = None
+                dict[prop] = None
         elif prop == "land":
             if data["property"][prop] != None:
-                immo_data[id][prop] = data["property"][prop]["surface"]
+                dict[prop] = data["property"][prop]["surface"]
             else:
-                immo_data[id][prop] = None
+                dict[prop] = None
         else:
-            immo_data[id][prop] = data["property"][prop]
+            dict[prop] = data["property"][prop]
     # get energy consumption data
     if data["transaction"]["certificates"] != None:
-        immo_data[id]["primaryEnergyConsumptionPerSqm"] = data["transaction"]["certificates"]["primaryEnergyConsumptionPerSqm"]
-        immo_data[id]["epcScore"] = data["transaction"]["certificates"]["epcScore"]
+        dict["primaryEnergyConsumptionPerSqm"] = data["transaction"]["certificates"]["primaryEnergyConsumptionPerSqm"]
+        dict["epcScore"] = data["transaction"]["certificates"]["epcScore"]
     else:
-        immo_data[id]["primaryEnergyConsumptionPerSqm"] = None
-        immo_data[id]["epcScore"] = None
+        dict["primaryEnergyConsumptionPerSqm"] = None
+        dict["epcScore"] = None
     if data["property"]["energy"] != None:
-        immo_data[id]["hasDoubleGlazing"] = data["property"]["energy"]["hasDoubleGlazing"]
+        dict["hasDoubleGlazing"] = data["property"]["energy"]["hasDoubleGlazing"]
     else:
-        immo_data[id]["hasDoubleGlazing"] = None
+        dict["hasDoubleGlazing"] = None
+    # get sale type
     sale_type = None
     if data["flags"]["isPublicSale"]:
         sale_type = "PublicSale"
@@ -66,8 +64,9 @@ def get_property_data_from_js(id, data):
         sale_type = "LifeAnnuitySale"
     elif data["flags"]["isAnInteractiveSale"]:
         sale_type = "AnInteractiveSale"
-    immo_data[id]["saleType"] = sale_type
-    return immo_data
+    dict["saleType"] = sale_type
+
+    return dict
 
 
 def scrape_property_data(id, session):
@@ -94,8 +93,7 @@ def scrape_property_data(id, session):
                 js_var = re.search(r"window\.classified = (\{.*\});", st.text)
                 js_var_value = js_var.group(1)
                 js_data = json.loads(js_var_value)
-                # immo_data[id]["Data"] = js_data
-                immo_data.update(get_property_data_from_js(id, js_data))
+                immo_data[id] = get_property_data_from_js(js_data, immo_data[id])
                 break
             else:
                 continue
@@ -108,31 +106,18 @@ def scrape_properties():
     file_path = str(Path.cwd() / "data" / file_name)
     immo_data = {}
     with open(file_path, "r") as file:
-        count = 0
-
         with requests.Session() as session:
             with ThreadPoolExecutor(max_workers=10) as executor:
                 executor.map(lambda id: immo_data.update(scrape_property_data(id, session)), [id.strip() for id in file])
-
-        # for line in file.readlines():
-        #     id = line.strip()
-        #     # Add concurrency
-        #     # Send scrape_property_data to multiple workers
-        #     # if id not in immo_data.keys():
-        #     immo_data.update(scrape_property_data(id, session))
-        #     count += 1
-        #     if count % 10 == 0:
-        #         print(count)
     return immo_data
 
 
-def save_to_json(immo_data):
+def save_to_json(data):
     """ Add """
     file_name = "propreties_data.json"
     file_path = str(Path.cwd() / "data" / file_name)
     with open(file_path, "w", encoding="utf-8") as json_file:
-        json_file.write(json.dumps(immo_data, indent=4))
-    # return immo_data
+        json_file.write(json.dumps(data, indent=4))
 
 
 if __name__ == "__main__":
