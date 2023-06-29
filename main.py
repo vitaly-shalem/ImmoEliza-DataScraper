@@ -3,5 +3,6 @@ from utils.property_scraper import property_scraper
 
 
 if __name__ == '__main__':
-    id_scraper(333)
+    # id_scraper(333)
     # property_scraper()
+    pass

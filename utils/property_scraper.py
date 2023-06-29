@@ -118,6 +118,7 @@ def save_to_json(data):
 
 def property_scraper():
     start = time.time()
+    print("Property scraping started at %s" % start)
     save_to_json(scrape_from_txt())
     end = time.time()
     print("Time taken to scrape listings: {:.6f}s".format(end-start))

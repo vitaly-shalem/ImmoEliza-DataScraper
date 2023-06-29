@@ -10,8 +10,6 @@ def get_ids_from_page(page, property_types, session):
     for prop_type in property_types:
         url_lists = "https://www.immoweb.be/en/search-results/%s/for-sale?countries=BE&page=%s&orderBy=newest" % (prop_type, page)
         r = session.get(url_lists)
-        print("type: ", prop_type)
-        print("page: ", page)
         for listing in r.json()["results"]:
             ids.append(listing['id'])
     return ids
@@ -38,6 +36,7 @@ def save_to_txt(ids):
 
 def id_scraper(pages):
     start = time.time()
+    print("Id scraping started at %s" % start)
     ids = get_ids(pages)
     save_to_txt(ids)
     end = time.time()
