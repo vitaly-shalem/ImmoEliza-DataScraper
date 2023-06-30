@@ -1,4 +1,3 @@
-import pandas
 
 def find_duplicate(properties_data_df):
     '''function that receives a Data Frame as a parameter and cleans the information inside it.'''
@@ -6,7 +5,7 @@ def find_duplicate(properties_data_df):
     # remove rows with a NULL value in the "country" column:
     properties_data_df.dropna(subset=['country'], inplace = True)
     # remove rows with a NULL value in the address ('street', 'number', 'box') column:
-    properties_data_df.dropna(subset=['street', 'number'], inplace = True)
+    properties_data_df.dropna(subset=['street', 'number'], inplace = True, how = 'all')
     # dataset removing symbols in field number of address
     properties_data_df['number'] = properties_data_df['number'].replace({'-':'', '!': '', ',' :''}, regex=True)
 
