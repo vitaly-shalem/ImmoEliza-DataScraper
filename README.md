@@ -1,71 +1,72 @@
 
-# Immoweb scraping
+# Immo Eliza - Data Scraper
+A group project @ [BeCode.org](https://becode.org/) as part of the **AI Bootcamp** in Gent
 
-This is the first stage of the project wich purpose is to create a Machine Learning model to make price predictions on real estate sales in Belgium.
 
-The task of the stage is to build a dataset gathering information about 15.000 properties all over Belgium. This dataset will be used later as a training set for your prediction model.
+## Project description
 
-This dataset is a `csv` file with the following columns:
+This is the first stage of a larger project to create a Machine Learning (ML) model to predict sell prices of real estate properties in Belgium.
 
-- id number of a property at www.immoweb.be;
-- url of a property;
-- price;
-- type;
-- locality and address;
-- floor if it is an appartment;
-- number of bedrooms;
-- surface;
-- construction year;
-- facade count;
-- floor count;
-- if its has elevator;
-- type of kitchen;
-- garden and its surface;
-- terace and its surface;
-- land and its surface;
-- if a property has fireplace;
-- if its has swimming pool;
-- airconditioner;
-- number of bathrooms, showers and toilets;
-- parkinglot;
-- ammount of energy consumption per square meter;
-- energy consumption score;
-- doubleglazing;
-- saletype.
+The current task is to gather actual data (at least 10,000 entries) from the Belgian real estate market. This data will be used to train and test ML prediction model.
 
-The script scrapes from the www.immoweb.be pages assential information about the properties using BeatifulSoup and Selenium. All the data are situated into the distionary where the property's ids are keys and the values are nesteed dictionaries with scraped datas. Then this dictionary is converted into Pandas' dataframe where rows are ids of the properties and columns are properties' attributes listed above. Then the script cleans up data from undesirable mistakes, marks and characters. After that Pandas' dataframe is converted into ".csv" file.
+The dataset delivered as a `csv` file and covers the following subjects:
+- ID number
+- Source URL
+- Price
+- Property type
+- Locality and address (if available)
+- Number of bedrooms
+- Livable surface
+- Building information (construction year, facade count, floor count, etc.)
+- Property condition
+- Kitchen type
+- Garden and its surface (if any)
+- Terace and its surface (if any)
+- The surface of land (for houses)
+- Availability of some extras:
+    - Open fire
+    - Swimming pool
+    - Airconditioner
+- Available facilities:
+    - Number of bathrooms, showers, and/or toilets
+    - Number of parking spaces
+- Energy consumption information
+- Sale type
 
-## How to Install and Run the Project
-To run the stage of the project you need to install folowing libraries:
-beautifulsoup4==4.12.2 (pip install beautifulsoup4)
-lxml==4.9.2 (pip install lxml)
-requests==2.31.0 (pip install requests)
-pandas==2.0.3 (pip install pandas)
-selenium==4.0.0. (pip install selenium)
+The Python-based tool uses [ImmoWeb](https://www.immoweb.be/en) website, the leading real estate website in Belgium, to scrape the required information and stores it in a dictionary format and later is written as a `csv` file.
 
-Then you have to copie from GitHub repository https://github.com/vitaly-shalem/ImmoEliza-DataScraper to your local computer all folders and run "main.py" file using command "python main.py" from your current folder where you copied files and folders are situated.
 
-## How to Use the Project
-The script scrapes from the www.immoweb.be pages assential information about the properties. 
+## Installation
 
-The output of the code will be a ".csv" file where rows are properties according to their ids and columns are properties' attributes. At the next stages this file will be used for a Machine Learning model to make price predictions on real estate sales in Belgium.
+1. Clone [ImmoEliza-DataScraper](https://github.com/vitaly-shalem/ImmoEliza-DataScraper) repository
+2. Change directory to the root of the repository
+3. Install required libraries by running `pip install -r requirements.txt`
 
-## Credits
-This stage of the project has lasted 5 days (June 26-30, 2023) as part of the AI Bootcamp at BeCode.org in Gent https://becode.org/.
-The stage was made by group of Junior AI & Data Scientists:
 
-Vitaly Shalem https://github.com/vitaly-shalem https://www.linkedin.com/in/vitaly-shalem-26aab265/ 
+## Usage
 
-Félicien De Hertogh https://github.com/feldeh https://www.linkedin.com/in/feliciendehertogh/
+- Execute the script by running the command `python main.py` in the terminal. 
+- This will scrape the property information from [ImmoWeb](https://www.immoweb.be/en) and store it in `data` directory in both `json` and `csv` formats.
 
-Cesar E. Mendoza V. https://github.com/mendoce24 https://www.linkedin.com/in/mendoce24/
 
-Mykola Senko https://github.com/MykolaSenko https://www.linkedin.com/in/mykola-senko-683510a4/.
+## Timeline
 
-The stage was made under the supervision of Vanessa River Quinones https://www.linkedin.com/in/vriveraq/ and Samuel Borms https://www.linkedin.com/in/sam-borms/?originalSubdomain=be
+This stage of the project lasted 4 days in the week of June 26-30, 2023.
 
-## License
 
-This project is under GPL License which allows to make modification to the code and use it for commercial purposes.
+## The Team
 
-Gent, June 30, 2021
+The stage was made by group of Junior AI & Data Scientists (in alphabetical order):
+
+- Félicien De Hertogh [LinkedIn](https://www.linkedin.com/in/feliciendehertogh/) | [GitHub](https://github.com/feldeh)
+- Cesar E. Mendoza V. [LinkedIn](https://www.linkedin.com/in/mendoce24/) | [GitHub](https://github.com/mendoce24)
+- Mykola Senko [LinkedIn](https://www.linkedin.com/in/mykola-senko-683510a4/) | [GitHub](https://github.com/MykolaSenko)
+- Vitaly Shalem [LinkedIn](https://www.linkedin.com/in/vitaly-shalem-26aab265/) | [GitHub](https://github.com/vitaly-shalem)
+
+
+## Instruction
+
+The stage was made under the supervision of [Vanessa Rivera Quiñones](https://www.linkedin.com/in/vriveraq/) and [Samuel Borms](https://www.linkedin.com/in/sam-borms/?originalSubdomain=be)
+
+
+Gent | June 30, 2021
