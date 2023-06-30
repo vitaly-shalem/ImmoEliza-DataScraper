@@ -9,7 +9,14 @@ from concurrent.futures import ThreadPoolExecutor
 
 def get_js_data(data, dict):
     # get price
-    dict["price"] = data["transaction"]["sale"]["price"]
+    dict["transactionType"] = data["transaction"]["type"]
+    dict["transactionSubtype"] = data["transaction"]["subtype"]
+    if data["transaction"]["sale"] != None:
+        dict["price"] = data["transaction"]["sale"]["price"]
+    elif data["transaction"]["rental"] != None:
+        dict["price"] = data["transaction"]["rental"]["price"]
+    else:
+        dict["price"] = None
     # get property data
     property = ["type", "subtype", "location",
                 "bedroomCount", "netHabitableSurface", "building", "hasLift", "kitchen",
@@ -63,7 +70,19 @@ def get_js_data(data, dict):
         sale_type = "LifeAnnuitySale"
     elif data["flags"]["isAnInteractiveSale"]:
         sale_type = "AnInteractiveSale"
+    elif data["flags"]["isInvestmentProject"]:
+        sale_type = "InvestmentProject"
+    elif data["flags"]["isNewRealEstateProject"]:
+        sale_type = "NewRealEstateProject"
+    #elif data["flags"]["isNewlyBuilt"]:
+    #    sale_type = "NewlyBuilt"
     dict["saleType"] = sale_type
+    # piblication date
+    dict["creationDate"] = None
+    dict["lastModificationDate"] = None
+    if data["publication"] != None:
+        dict["creationDate"] = data["publication"]["creationDate"]
+        dict["lastModificationDate"] = data["publication"]["lastModificationDate"]
 
     return dict
 
