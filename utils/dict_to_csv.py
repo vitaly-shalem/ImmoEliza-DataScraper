@@ -1,7 +1,7 @@
 import pandas as pd
 import json
 from pathlib import Path
-from clean_data import clean_data_frame
+from find_duplicate import find_duplicate
 
 def dict_to_csv():
     path_to_open = Path.cwd() / "data" / "properties_data.json"
@@ -14,6 +14,7 @@ def dict_to_csv():
 
     path_to_save = Path.cwd() / "data" / "properties_data.csv"
 
-    df_clean = clean_data_frame(df)
-
-    df_clean.to_csv(path_to_save, index_label="id", encoding="utf-8")
+    #data frame with duplicate data
+    df_duplicate = find_duplicate(df)
+    
+    df.to_csv(path_to_save, index_label="id", encoding="utf-8")
