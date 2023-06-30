@@ -4,7 +4,8 @@ from utils.json_to_csv import json_to_csv
 
 
 def main():
-    id_scraper(5)
+    search_pages_num = 5
+    id_scraper(search_pages_num)
     property_scraper()
     json_to_csv()
 

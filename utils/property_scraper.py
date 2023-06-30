@@ -140,7 +140,7 @@ def scrape_from_txt():
     @return (dict): dictionary containing property data scraped from multiple property listings.
     """
     file_name = "properties_ids.txt"
-    file_path = str(Path.cwd() / "data" / file_name)
+    file_path = Path.cwd() / "data" / file_name
     property_data = {}
     with open(file_path, "r") as file:
         with requests.Session() as session:

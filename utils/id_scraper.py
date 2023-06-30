@@ -7,10 +7,10 @@ from pathlib import Path
 
 def get_ids_from_page(page, property_types, session):
     """
-    Get property ids from the search-results endpoint for a specific page for the given page and property type.
+    Get property ids from the search-results endpoint for a specific page for the given page and property types.
 
     @param page (int): page number to retrieve ids from.
-    @param property_type (list): list of property types to search for.
+    @param property_types (list): list of property types to search for.
     @param session (requests.Session()): requests session object for making http requests.
 
     @return (list): list of property ids from the page.
