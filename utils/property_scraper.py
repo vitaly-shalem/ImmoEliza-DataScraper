@@ -7,16 +7,24 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 
-def get_js_data(data, dict):
+def get_js_data(js_data, property_data):
+    """
+    Extracts relevant property information from the javascript data.
+
+    @param js_data (dict): javascript data containing property information.
+    @param property_data (dict): dictionary with initial data to which the property information will be added.
+
+    @return (dict): dictionary containing property information.
+    """
     # get price
-    dict["transactionType"] = data["transaction"]["type"]
-    dict["transactionSubtype"] = data["transaction"]["subtype"]
-    if data["transaction"]["sale"] != None:
-        dict["price"] = data["transaction"]["sale"]["price"]
-    elif data["transaction"]["rental"] != None:
-        dict["price"] = data["transaction"]["rental"]["price"]
+    property_data["transactionType"] = js_data["transaction"]["type"]
+    property_data["transactionSubtype"] = js_data["transaction"]["subtype"]
+    if js_data["transaction"]["sale"] != None:
+        property_data["price"] = js_data["transaction"]["sale"]["price"]
+    elif js_data["transaction"]["rental"] != None:
+        property_data["price"] = js_data["transaction"]["rental"]["price"]
     else:
-        dict["price"] = None
+        property_data["price"] = None
     # get property data
     property = ["type", "subtype", "location",
                 "bedroomCount", "netHabitableSurface", "building", "hasLift", "kitchen",
@@ -29,65 +37,73 @@ def get_js_data(data, dict):
             loc = ["country", "region", "province", "district", "locality",
                    "postalCode", "street", "number", "box", "floor"]
             for l in loc:
-                dict[l] = data["property"][prop][l]
+                property_data[l] = js_data["property"][prop][l]
         elif prop == "building":
             sub = ["constructionYear", "facadeCount", "floorCount"]
             for s in sub:
-                if data["property"][prop] != None:
-                    dict[s] = data["property"][prop][s]
+                if js_data["property"][prop] != None:
+                    property_data[s] = js_data["property"][prop][s]
                 else:
-                    dict[s] = None
+                    property_data[s] = None
         elif prop == "kitchen":
-            if data["property"][prop] != None:
-                dict[prop] = data["property"][prop]["type"]
+            if js_data["property"][prop] != None:
+                property_data[prop] = js_data["property"][prop]["type"]
             else:
-                dict[prop] = None
+                property_data[prop] = None
         elif prop == "land":
-            if data["property"][prop] != None:
-                dict[prop] = data["property"][prop]["surface"]
+            if js_data["property"][prop] != None:
+                property_data[prop] = js_data["property"][prop]["surface"]
             else:
-                dict[prop] = None
+                property_data[prop] = None
         else:
-            dict[prop] = data["property"][prop]
+            property_data[prop] = js_data["property"][prop]
     # get energy consumption data
-    if data["transaction"]["certificates"] != None:
-        dict["primaryEnergyConsumptionPerSqm"] = data["transaction"]["certificates"]["primaryEnergyConsumptionPerSqm"]
-        dict["epcScore"] = data["transaction"]["certificates"]["epcScore"]
+    if js_data["transaction"]["certificates"] != None:
+        property_data["primaryEnergyConsumptionPerSqm"] = js_data["transaction"]["certificates"]["primaryEnergyConsumptionPerSqm"]
+        property_data["epcScore"] = js_data["transaction"]["certificates"]["epcScore"]
     else:
-        dict["primaryEnergyConsumptionPerSqm"] = None
-        dict["epcScore"] = None
-    if data["property"]["energy"] != None:
-        dict["hasDoubleGlazing"] = data["property"]["energy"]["hasDoubleGlazing"]
+        property_data["primaryEnergyConsumptionPerSqm"] = None
+        property_data["epcScore"] = None
+    if js_data["property"]["energy"] != None:
+        property_data["hasDoubleGlazing"] = js_data["property"]["energy"]["hasDoubleGlazing"]
     else:
-        dict["hasDoubleGlazing"] = None
+        property_data["hasDoubleGlazing"] = None
     # get sale type
     sale_type = None
-    if data["flags"]["isPublicSale"]:
+    if js_data["flags"]["isPublicSale"]:
         sale_type = "PublicSale"
-    elif data["flags"]["isNotarySale"]:
+    elif js_data["flags"]["isNotarySale"]:
         sale_type = "NotarySale"
-    elif data["flags"]["isLifeAnnuitySale"]:
+    elif js_data["flags"]["isLifeAnnuitySale"]:
         sale_type = "LifeAnnuitySale"
-    elif data["flags"]["isAnInteractiveSale"]:
+    elif js_data["flags"]["isAnInteractiveSale"]:
         sale_type = "AnInteractiveSale"
-    elif data["flags"]["isInvestmentProject"]:
+    elif js_data["flags"]["isInvestmentProject"]:
         sale_type = "InvestmentProject"
-    elif data["flags"]["isNewRealEstateProject"]:
+    elif js_data["flags"]["isNewRealEstateProject"]:
         sale_type = "NewRealEstateProject"
-    #elif data["flags"]["isNewlyBuilt"]:
+    # elif data["flags"]["isNewlyBuilt"]:
     #    sale_type = "NewlyBuilt"
-    dict["saleType"] = sale_type
+    property_data["saleType"] = sale_type
     # piblication date
-    dict["creationDate"] = None
-    dict["lastModificationDate"] = None
-    if data["publication"] != None:
-        dict["creationDate"] = data["publication"]["creationDate"]
-        dict["lastModificationDate"] = data["publication"]["lastModificationDate"]
+    property_data["creationDate"] = None
+    property_data["lastModificationDate"] = None
+    if js_data["publication"] != None:
+        property_data["creationDate"] = js_data["publication"]["creationDate"]
+        property_data["lastModificationDate"] = js_data["publication"]["lastModificationDate"]
 
-    return dict
+    return property_data
 
 
 def get_page_data(id, session):
+    """
+    Scrape property information from a specific property listing page.
+
+    @param id (str): id of the property.
+    @param session (requests.Session()): requests session object for making http requests.
+
+    @return (dict): dictionary containing property information.
+    """
     url = "https://www.immoweb.be/en/classified/" + id
     property_data = {
         id: {}
@@ -118,24 +134,37 @@ def get_page_data(id, session):
 
 
 def scrape_from_txt():
+    """
+    Scrape property data from multiple pages ids listed in a text file using multithreading.
+
+    @return (dict): dictionary containing property data scraped from multiple property listings.
+    """
     file_name = "properties_ids.txt"
     file_path = str(Path.cwd() / "data" / file_name)
     property_data = {}
     with open(file_path, "r") as file:
         with requests.Session() as session:
             with ThreadPoolExecutor(max_workers=10) as executor:
-                executor.map(lambda id: property_data.update(get_page_data(id, session)), [id.strip() for id in file])
+                executor.map(lambda id: property_data.update(get_page_data(id, session)), (id.strip() for id in file))
     return property_data
 
 
 def save_to_json(data):
+    """
+    Save scraped property data into a json file.
+
+    @param data (dict): dictionary containing property data.
+    """
     file_name = "properties_data.json"
-    file_path = str(Path.cwd() / "data" / file_name)
+    file_path = Path.cwd() / "data" / file_name
     with open(file_path, "w", encoding="utf-8") as json_file:
         json.dump(data, json_file, ensure_ascii=False, indent=4)
 
 
 def property_scraper():
+    """
+    Main function to scrape property data and save it into a json file.
+    """
     start = time.time()
     save_to_json(scrape_from_txt())
     end = time.time()
