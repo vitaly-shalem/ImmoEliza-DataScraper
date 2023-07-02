@@ -13,7 +13,6 @@ def get_js_data(js_data, property_data):
 
     @param js_data (dict): javascript data containing property information.
     @param property_data (dict): dictionary with initial data to which the property information will be added.
-
     @return (dict): dictionary containing property information.
     """
     # get price
@@ -82,10 +81,8 @@ def get_js_data(js_data, property_data):
         sale_type = "InvestmentProject"
     elif js_data["flags"]["isNewRealEstateProject"]:
         sale_type = "NewRealEstateProject"
-    # elif data["flags"]["isNewlyBuilt"]:
-    #    sale_type = "NewlyBuilt"
     property_data["saleType"] = sale_type
-    # piblication date
+    # publication date
     property_data["creationDate"] = None
     property_data["lastModificationDate"] = None
     if js_data["publication"] != None:
@@ -101,7 +98,6 @@ def get_page_data(id, session):
 
     @param id (str): id of the property.
     @param session (requests.Session()): requests session object for making http requests.
-
     @return (dict): dictionary containing property information.
     """
     url = "https://www.immoweb.be/en/classified/" + id
@@ -128,8 +124,7 @@ def get_page_data(id, session):
                 js_data = json.loads(js_var_value)
                 property_data[id] = get_js_data(js_data, property_data[id])
                 break
-            else:
-                continue
+
     return property_data
 
 

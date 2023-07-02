@@ -12,7 +12,6 @@ def get_ids_from_page(page, property_types, session):
     @param page (int): page number to retrieve ids from.
     @param property_types (list): list of property types to search for.
     @param session (requests.Session()): requests session object for making http requests.
-
     @return (list): list of property ids from the page.
     """
     ids = []
@@ -29,7 +28,6 @@ def get_ids(pages):
     Get property ids from multiple pages using multithreading.
 
     @param pages (int): number of pages to scrape property ids from.
-
     @return (set): set of unique property ids.
     """
     if pages > 333:
