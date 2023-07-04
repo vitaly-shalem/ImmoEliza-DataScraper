@@ -140,6 +140,8 @@ def scrape_from_txt():
     with open(file_path, "r") as file:
         with requests.Session() as session:
             with ThreadPoolExecutor(max_workers=10) as executor:
+                # the lambda function passes the id and the session as arguments to the get_page_data() function; the returned dict is then added to the property_data dict
+                # executor.map() applies the function in parallel for each id in the file
                 executor.map(lambda id: property_data.update(get_page_data(id, session)), (id.strip() for id in file))
     return property_data
 
@@ -161,6 +163,7 @@ def property_scraper():
     Main function to scrape property data and save it into a json file.
     """
     start = time.time()
-    save_to_json(scrape_from_txt())
+    immo_data = scrape_from_txt()
+    save_to_json(immo_data)
     end = time.time()
     print("Time taken to scrape listings: {:.6f}s".format(end-start))
