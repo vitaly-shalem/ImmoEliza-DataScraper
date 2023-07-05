@@ -34,7 +34,7 @@ def get_ids(pages):
         pages = 333
     with requests.Session() as session:
         with ThreadPoolExecutor(max_workers=10) as executor:
-            # the lambda function passes the page number, the list of keywords ['house', 'apartment'] and the session object as arguments
+            # the lambda function passes the page number, the list of property type ['house', 'apartment'] and the session object as arguments
             # executor.map() applies the function in parallel for each page number in the range from 1 to pages
             result = executor.map(lambda page: get_ids_from_page(page, ['house', 'apartment'], session), range(1, pages+1))
             # flatten the result, which is a generator of lists, into a single list

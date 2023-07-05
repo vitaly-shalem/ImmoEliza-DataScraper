@@ -34,11 +34,11 @@ def get_js_data(js_data, property_data):
     for prop in property:
         if prop == "location":
             loc = ["country", "region", "province", "district", "locality",
-                   "postalCode", "street", "number", "box", "floor"]
+                   "postalCode", "street", "number", "box", "floor", "latitude", "longitude"]
             for l in loc:
                 property_data[l] = js_data["property"][prop][l]
         elif prop == "building":
-            sub = ["constructionYear", "facadeCount", "floorCount"]
+            sub = ["constructionYear", "facadeCount", "floorCount", "condition"]
             for s in sub:
                 if js_data["property"][prop] != None:
                     property_data[s] = js_data["property"][prop][s]
